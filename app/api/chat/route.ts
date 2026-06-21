@@ -22,13 +22,13 @@ async function getAccessToken(): Promise<string> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-  grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
-  requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-  subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
-  subject_token: token,
-  audience: `//iam.googleapis.com/projects/${gcpConfig.projectNumber}/locations/global/workloadIdentityPools/${gcpConfig.poolId}/providers/${gcpConfig.providerId}`,
-  scope: 'https://www.googleapis.com/auth/cloud-platform',
-}),
+        grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+        requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+        subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
+        subject_token: token,
+        audience: `//iam.googleapis.com/projects/${gcpConfig.projectNumber}/locations/global/workloadIdentityPools/${gcpConfig.poolId}/providers/${gcpConfig.providerId}`,
+        scope: 'https://www.googleapis.com/auth/cloud-platform',
+      }),
     }
   );
 
@@ -48,8 +48,9 @@ async function searchVertex(query: string): Promise<string> {
   try {
     const accessToken = await getAccessToken();
     
+    // 修正：使用 dataStores 而非 engines
     const response = await fetch(
-      `https://discoveryengine.googleapis.com/v1alpha/projects/${gcpConfig.projectId}/locations/global/collections/default_collection/engines/jyren-zhuan-law/servingConfigs/default_config:search`,
+      `https://discoveryengine.googleapis.com/v1alpha/projects/${gcpConfig.projectId}/locations/global/collections/default_collection/dataStores/jyren-zhuan-law/servingConfigs/default_config:search`,
       {
         method: 'POST',
         headers: {
@@ -64,7 +65,8 @@ async function searchVertex(query: string): Promise<string> {
     );
 
     if (!response.ok) {
-      console.error('❌ Vertex API 错误:', response.status);
+      const errorText = await response.text();
+      console.error('❌ Vertex API 错误:', response.status, errorText);
       return '';
     }
 
@@ -79,6 +81,7 @@ async function searchVertex(query: string): Promise<string> {
       .filter((text: string | null) => text !== null)
       .join('\n\n---\n\n');
 
+    console.log('🔍 提取的知识内容长度:', contexts.length);
     return contexts;
   } catch (error) {
     console.error('❌ 检索失败:', error);
