@@ -22,12 +22,12 @@ async function getAccessToken(): Promise<string> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
-        subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
-        subject_token: token,
-        audience: `//iam.googleapis.com/projects/${gcpConfig.projectNumber}/locations/global/workloadIdentityPools/${gcpConfig.poolId}/providers/${gcpConfig.providerId}`,
-        scope: 'https://www.googleapis.com/auth/cloud-platform',
-      }),
+  grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',  // 修改这一行
+  subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
+  subject_token: token,
+  audience: `//iam.googleapis.com/projects/${gcpConfig.projectNumber}/locations/global/workloadIdentityPools/${gcpConfig.poolId}/providers/${gcpConfig.providerId}`,
+  scope: 'https://www.googleapis.com/auth/cloud-platform',
+}),
     }
   );
 
