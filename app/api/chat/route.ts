@@ -48,9 +48,9 @@ async function searchVertex(query: string): Promise<string> {
   try {
     const accessToken = await getAccessToken();
     
-    // 修改后的 URL：直接对 dataStore 调用 :search 方法
+    // 使用 v1 版本和 servingConfigs 路径
     const response = await fetch(
-      `https://discoveryengine.googleapis.com/v1alpha/projects/${gcpConfig.projectId}/locations/global/collections/default_collection/dataStores/jyren-zhuan-law:search`,
+      `https://discoveryengine.googleapis.com/v1/projects/${gcpConfig.projectId}/locations/global/collections/default_collection/dataStores/jyren-zhuan-law/servingConfigs/default_config:search`,
       {
         method: 'POST',
         headers: {
