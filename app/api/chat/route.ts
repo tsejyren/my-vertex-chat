@@ -14,21 +14,6 @@ const gcpConfig = {
 async function getAccessToken(): Promise<string> {
   const token = await getVercelOidcToken();
   
-  // --- 添加日志：查看 OIDC 令牌内容 ---
-  console.log('🔍 OIDC Token (完整):', token);
-  
-  // 解码 JWT 的 payload 部分 (第二部分)
-  try {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-      console.log('🔍 OIDC Token Payload:', JSON.stringify(payload, null, 2));
-    }
-  } catch (e) {
-    console.log('⚠️ 无法解码 JWT:', e);
-  }
-  // --- 日志结束 ---
-  
   const response = await fetch(
     `https://sts.googleapis.com/v1/token`,
     {
@@ -63,7 +48,6 @@ async function searchVertex(query: string): Promise<string> {
   try {
     const accessToken = await getAccessToken();
     
-    // 使用 v1 版本和 servingConfigs 路径
     const response = await fetch(
       `https://discoveryengine.googleapis.com/v1/projects/${gcpConfig.projectId}/locations/global/collections/default_collection/dataStores/jyren-zhuan-law/servingConfigs/default_config:search`,
       {
@@ -139,19 +123,14 @@ export async function POST(req: Request) {
 ${knowledgeContext}`;
     }
 
-    // 调用 DeepSeek (通过 AI Gateway)
-    console.log('🤖 调用 DeepSeek...');
+    // --- 调用 AI Gateway 官方免费模型（无 BYOK）---
+    console.log('🤖 调用免费模型: xai/grok-4.1-fast-non-reasoning...');
     const result = await streamText({
-      model: 'deepseek/deepseek-v4-flash',
+      // 使用免费模型
+      model: 'xai/grok-4.1-fast-non-reasoning',
       messages: messages,
       system: systemPrompt,
-      providerOptions: {
-        gateway: {
-          byok: {
-            deepseek: [{ apiKey: process.env.QINIU_DEEPSEEK_API_KEY }],
-          },
-        },
-      },
+      // 移除 BYOK 配置，使用免费额度
     });
 
     console.log('✅ 调用成功');
