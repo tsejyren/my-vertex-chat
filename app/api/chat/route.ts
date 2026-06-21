@@ -48,8 +48,11 @@ async function searchVertex(query: string): Promise<string> {
   try {
     const accessToken = await getAccessToken();
     
+    // 修正后的路径：使用正确的数据存储区 ID（包含下划线和数字后缀）
+    const servingConfig = `projects/${gcpConfig.projectId}/locations/global/collections/default_collection/dataStores/jyren-zhuan-law_1781871428287/servingConfigs/default_config`;
+    
     const response = await fetch(
-      `https://discoveryengine.googleapis.com/v1/projects/${gcpConfig.projectId}/locations/global/collections/default_collection/dataStores/jyren-zhuan-law/servingConfigs/default_config:search`,
+      `https://discoveryengine.googleapis.com/v1/${servingConfig}:search`,
       {
         method: 'POST',
         headers: {
@@ -123,14 +126,12 @@ export async function POST(req: Request) {
 ${knowledgeContext}`;
     }
 
-    // --- 调用 AI Gateway 官方免费模型（无 BYOK）---
+    // 调用免费模型
     console.log('🤖 调用免费模型: xai/grok-4.1-fast-non-reasoning...');
     const result = await streamText({
-      // 使用免费模型
       model: 'xai/grok-4.1-fast-non-reasoning',
       messages: messages,
       system: systemPrompt,
-      // 移除 BYOK 配置，使用免费额度
     });
 
     console.log('✅ 调用成功');
